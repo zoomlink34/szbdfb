@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JOIN THE LEGACY</title>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: #111; padding: 40px; border-radius: 20px; border: 2px solid #D4AF37; text-align: center; width: 300px; }
+        input { width: 90%; padding: 15px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 8px; }
+        .btn { width: 100%; padding: 15px; background: #D4AF37; color: #000; font-weight: bold; border-radius: 8px; cursor: pointer; border: none; }
+        #success { display: none; position: fixed; inset: 0; background: #000; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+    </style>
+</head>
+<body>
+    <div class="box" id="fbox">
+        <h2 style="color:#D4AF37">RESERVE PLOT</h2>
+        <input type="text" id="bn" placeholder="Brand Name">
+        <input type="number" id="pid" placeholder="Plot ID (1-5000)">
+        <button class="btn" onclick="submit()">SUBMIT TO CEO</button>
+    </div>
+
+    <div id="success">
+        <h1 style="color:#D4AF37; font-size: 40px;">CONGRATULATIONS! 🎉</h1>
+        <h2 id="brand-display"></h2>
+        <p>Your request has been sent to the Legacy Database.</p>
+        <p>Redirecting to Home...</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script>
+        firebase.initializeApp({databaseURL: "https://m-legacy-5cf2b-default-rtdb.firebaseio.com/"});
+        function submit() {
+            const n = document.getElementById('bn').value, p = document.getElementById('pid').value;
+            const id = "LGC" + Math.floor(Math.random()*99999);
+            if(!n || !p) return alert("Fill all fields!");
+            firebase.database().ref('orders/'+id).set({name:n, plotID:p}).then(() => {
+                document.getElementById('brand-display').innerText = n;
+                document.getElementById('fbox').style.display='none';
+                document.getElementById('success').style.display='flex';
+                setTimeout(() => { window.location.href="index.html"; }, 3500);
+            });
+        }
+    </script>
+</body>
+</html>
