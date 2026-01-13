@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body style="text-align:center; padding:50px; font-family:sans-serif;">
+    <div style="max-width:350px; margin:auto; border:2px solid #D4AF37; padding:20px; border-radius:15px;">
+        <h3>CEO FORCE LOAD</h3>
+        <input type="text" id="n" placeholder="Brand Name" style="width:90%; padding:10px; margin:5px;">
+        <input type="text" id="i" placeholder="Image Link" style="width:90%; padding:10px; margin:5px;">
+        <input type="number" id="p" placeholder="Plot ID (1-5000)" style="width:90%; padding:10px; margin:5px;">
+        <button onclick="up()" style="width:100%; padding:15px; background:black; color:gold; font-weight:bold; cursor:pointer;">PUBLISH LIVE</button>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script>
+        firebase.initializeApp({databaseURL: "https://m-legacy-5cf2b-default-rtdb.firebaseio.com/"});
+        function up() {
+            const name=document.getElementById('n').value, img=document.getElementById('i').value, pid=parseInt(document.getElementById('p').value);
+            const x=((pid-1)%100)*40, y=Math.floor((pid-1)/100)*25;
+            firebase.database().ref('pixels/man_'+Date.now()).set({name, imageUrl:img, x, y, plotID:pid}).then(()=>alert("Live!"));
+        }
+    </script>
+</body>
+</html>
