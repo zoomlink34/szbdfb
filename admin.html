@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CEO ADMIN | RECORDS</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
+        .card { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #000; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .history-section { margin-top: 50px; border-top: 3px solid #D4AF37; padding-top: 20px; }
+        .history-item { background: #e9e9e9; padding: 10px; margin-bottom: 5px; font-size: 13px; }
+        input, textarea { width: 100%; margin: 10px 0; padding: 10px; }
+        button { padding: 10px 20px; cursor: pointer; border: none; color: #fff; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>CEO DASHBOARD - ACTIVE ORDERS</h1>
+    <div id="order-list"></div>
+
+    <div class="history-section">
+        <h2>PAST RECORDS (History)</h2>
+        <div id="history-list"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script>
+        firebase.initializeApp({databaseURL: "https://m-legacy-5cf2b-default-rtdb.firebaseio.com/"});
+        const db = firebase.database();
+
+        // পেন্ডিং অর্ডার লোড
+        db.ref('orders').on('value', s => {
+            const list = document.getElementById('order-list'); list.innerHTML = "";
+            const data = s.val(); if(!data) return list.innerHTML = "No new orders.";
+            Object.keys(data).forEach(id => {
+                list.innerHTML += `<div class="card">
+                    <b>ORDER ID: ${id}</b> | Brand: ${data[id].name} | Plot: ${data[id].plotID}<br>
+                    <input type="text" id="img_${id}" placeholder="Direct Logo Link (ImgBB)">
+                    <textarea id="msg_${id}" placeholder="Message for Customer"></textarea>
+                    <button onclick="approve('${id}', '${data[id].name}', ${data[id].plotID})" style="background:green;">APPROVE</button>
+                    <button onclick="reject('${id}')" style="background:red;">REJECT</button>
+                </div>`;
+            });
+        });
+
+        // হিস্ট্রি/রেকর্ড লোড
+        db.ref('notifications').on('value', s => {
+            const hList = document.getElementById('history-list'); hList.innerHTML = "";
+            const data = s.val(); if(!data) return;
+            Object.keys(data).forEach(id => {
+                hList.innerHTML += `<div class="history-item">
+                    ID: ${id} | Status: <b>${data[id].status}</b> | Msg: ${data[id].message}
+                </div>`;
+            });
+        });
+
+        function approve(id, name, pID) {
+            const img = document.getElementById('img_'+id).value;
+            const msg = document.getElementById('msg_'+id).value || "Congrats! Your brand is now live.";
+            if(!img) return alert("Image link missing!");
+            const x = ((pID-1)%100)*40, y = Math.floor((pID-1)/100)*25;
+            db.ref('pixels/'+id).set({name, imageUrl:img, x, y, plotID:pID}).then(() => {
+                db.ref('notifications/'+id).set({status: "Approved", message: msg, date: Date.now()});
+                db.ref('orders/'+id).remove();
+            });
+        }
+
+        function reject(id) {
+            const msg = document.getElementById('msg_'+id).value || "Order rejected due to invalid info.";
+            db.ref('notifications/'+id).set({status: "Rejected", message: msg, date: Date.now()});
+            db.ref('orders/'+id).remove();
+        }
+    </script>
+</body>
+</html>
